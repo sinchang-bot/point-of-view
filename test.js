@@ -1082,3 +1082,106 @@ test('reply.view with ejs engine, templates with folder specified, include files
     })
   })
 })
+
+test('reply.view with artTemplate engine and custom templates folder', t => {
+  t.plan(6)
+  const fastify = Fastify()
+  const artTemplate = require('art-template')
+  const data = { text: 'text' }
+
+  fastify.register(require('./index'), {
+    engine: {
+      artTemplate: artTemplate
+    },
+    templates: 'templates'
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.view('/index.art', data)
+  })
+
+  fastify.listen(0, err => {
+    t.error(err)
+
+    sget({
+      method: 'GET',
+      url: 'http://localhost:' + fastify.server.address().port
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 200)
+      t.strictEqual(response.headers['content-length'], '' + body.length)
+      t.strictEqual(response.headers['content-type'], 'text/html; charset=utf-8')
+      t.strictEqual(artTemplate.render(fs.readFileSync('./templates/index.art', 'utf8'), data), body.toString())
+      fastify.close()
+    })
+  })
+})
+
+test('reply.view with artTemplate engine and full path templates folder', t => {
+  t.plan(6)
+  const fastify = Fastify()
+  const artTemplate = require('art-template')
+  const data = { text: 'text' }
+
+  fastify.register(require('./index'), {
+    engine: {
+      artTemplate: artTemplate
+    },
+    templates: path.join(__dirname, 'templates')
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.view('/index.art', data)
+  })
+
+  fastify.listen(0, err => {
+    t.error(err)
+
+    sget({
+      method: 'GET',
+      url: 'http://localhost:' + fastify.server.address().port
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 200)
+      t.strictEqual(response.headers['content-length'], '' + body.length)
+      t.strictEqual(response.headers['content-type'], 'text/html; charset=utf-8')
+      t.strictEqual(artTemplate.render(fs.readFileSync('./templates/index.art', 'utf8'), data), body.toString())
+      fastify.close()
+    })
+  })
+})
+
+test('reply.view with artTemplate engine and layout without title', t => {
+  t.plan(7)
+  const fastify = Fastify()
+  const artTemplate = require('art-template')
+  const data = { text: 'text' }
+
+  fastify.register(require('./index'), {
+    engine: {
+      artTemplate: artTemplate
+    }
+    // templates: path.join(__dirname, 'templates')
+  })
+
+  fastify.get('/', (req, reply) => {
+    reply.view('./templates/content.art', data)
+  })
+
+  fastify.listen(0, err => {
+    t.error(err)
+
+    sget({
+      method: 'GET',
+      url: 'http://localhost:' + fastify.server.address().port
+    }, (err, response, body) => {
+      t.error(err)
+      t.strictEqual(response.statusCode, 200)
+      t.includes(body.toString, 'My Site')
+      t.strictEqual(response.headers['content-length'], '' + body.length)
+      t.strictEqual(response.headers['content-type'], 'text/html; charset=utf-8')
+      t.strictEqual(artTemplate.render(fs.readFileSync('./templates/content.art', 'utf8'), data), body.toString())
+      fastify.close()
+    })
+  })
+})

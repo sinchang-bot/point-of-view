@@ -5,7 +5,7 @@ const readFile = require('fs').readFile
 const resolve = require('path').resolve
 const join = require('path').join
 const HLRU = require('hashlru')
-const supportedEngines = ['ejs', 'nunjucks', 'pug', 'handlebars', 'marko', 'ejs-mate', 'mustache']
+const supportedEngines = ['ejs', 'nunjucks', 'pug', 'handlebars', 'marko', 'ejs-mate', 'mustache', 'artTemplate']
 
 function fastifyView (fastify, opts, next) {
   if (!opts.engine) {
@@ -32,6 +32,7 @@ function fastifyView (fastify, opts, next) {
     handlebars: viewHandlebars,
     mustache: viewMustache,
     nunjucks: viewNunjucks,
+    artTemplate: viewArtTemplate,
     _default: view
   }
 
@@ -244,6 +245,23 @@ function fastifyView (fastify, opts, next) {
         let html = engine.render(templateString, data, partialsObject)
         this.header('Content-Type', 'text/html; charset=' + charset).send(html)
       })
+    })
+  }
+
+  function viewArtTemplate (page, data) {
+    if (!page || !data) {
+      this.send(new Error('Missing data'))
+      return
+    }
+    // Append view extension.
+    page = getPage(page, 'art')
+    getTemplateString(page, (err, templateString) => {
+      if (err) {
+        this.send(err)
+        return
+      }
+      let html = engine.render(templateString, data, options)
+      this.header('Content-Type', 'text/html; charset=' + charset).send(html)
     })
   }
 

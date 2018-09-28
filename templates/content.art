@@ -1,0 +1,12 @@
+<!--content.art-->
+{{extend './templates/layout'}}
+
+{{block 'title'}}{{title}}{{/block}}
+
+{{block 'head'}}
+    <link rel="stylesheet" href="custom.css">
+{{/block}}
+
+{{block 'content'}}
+<p>{{ text }}</p>
+{{/block}}

@@ -36,6 +36,7 @@
     "hashlru": "^2.2.1"
   },
   "devDependencies": {
+    "art-template": "^4.13.1",
     "cross-env": "^5.2.0",
     "ejs": "^2.5.9",
     "ejs-mate": "^2.3.0",
